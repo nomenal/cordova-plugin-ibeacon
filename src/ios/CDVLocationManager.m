@@ -46,7 +46,7 @@
     
     
     if (IsAtLeastiOSVersion(@"9.0")) {
-        self.locationManager.allowsBackgroundLocationUpdates = YES;
+        // self.locationManager.allowsBackgroundLocationUpdates = YES;
     }
 }
 
