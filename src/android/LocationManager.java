@@ -45,8 +45,10 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.BleNotAvailableException;
 import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.MonitorNotifier;
+import org.altbeacon.beacon.BootstrapNotifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
+import org.altbeacon.beacon.startup.RegionBootstrap;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
@@ -447,8 +449,8 @@ public class LocationManager extends CordovaPlugin implements BeaconConsumer {
 
     private void createMonitorCallbacks(final CallbackContext callbackContext) {
 
-        //Monitor callbacks
-        iBeaconManager.setMonitorNotifier(new MonitorNotifier() {
+        //Monitor callbacks, use BootstrapNotifier with RegionBootstrap
+        iBeaconManager.setMonitorNotifier(new BootstrapNotifier() {
             @Override
             public void didEnterRegion(Region region) {
                 debugLog("didEnterRegion INSIDE for " + region.getUniqueId());
@@ -1202,7 +1204,10 @@ public class LocationManager extends CordovaPlugin implements BeaconConsumer {
         Identifier id1 = uuid != null ? Identifier.parse(uuid) : null;
         Identifier id2 = major != null ? Identifier.parse(major) : null;
         Identifier id3 = minor != null ? Identifier.parse(minor) : null;
-        return new Region(identifier, id1, id2, id3);
+        Region region = new Region(identifier, id1, id2, id3);
+        // Bootstrap region, allowing app to monitor regions even when killed
+        new RegionBootstrap(iBeaconManager.getMonitoringNotifier(), region);
+        return region;
     }
 
 
