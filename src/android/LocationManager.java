@@ -45,7 +45,7 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.BleNotAvailableException;
 import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.MonitorNotifier;
-import org.altbeacon.beacon.BootstrapNotifier;
+import org.altbeacon.beacon.startup.BootstrapNotifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.startup.RegionBootstrap;
@@ -467,6 +467,11 @@ public class LocationManager extends CordovaPlugin implements BeaconConsumer {
             public void didDetermineStateForRegion(int state, Region region) {
                 debugLog("didDetermineStateForRegion '" + nameOfRegionState(state) + "' for region: " + region.getUniqueId());
                 dispatchMonitorState("didDetermineStateForRegion", state, region, callbackContext);
+            }
+
+            @Override
+            public Context getApplicationContext() {
+                return cordova.getActivity();
             }
 
             // Send state to JS callback until told to stop
@@ -1181,11 +1186,11 @@ public class LocationManager extends CordovaPlugin implements BeaconConsumer {
         if (!json.has("radius"))
             throw new InvalidKeyException("'radius' is missing, cannot parse CircularRegion.");
 
-     	/*String identifier = json.getString("identifier");
+      /*String identifier = json.getString("identifier");
          double latitude = json.getDouble("latitude");
-     	double longitude = json.getDouble("longitude");
-     	double radius = json.getDouble("radius");
-    	*/
+      double longitude = json.getDouble("longitude");
+      double radius = json.getDouble("radius");
+      */
         throw new UnsupportedOperationException("Circular regions are not supported at present");
     }
 
@@ -1206,7 +1211,7 @@ public class LocationManager extends CordovaPlugin implements BeaconConsumer {
         Identifier id3 = minor != null ? Identifier.parse(minor) : null;
         Region region = new Region(identifier, id1, id2, id3);
         // Bootstrap region, allowing app to monitor regions even when killed
-        new RegionBootstrap(iBeaconManager.getMonitoringNotifier(), region);
+        new RegionBootstrap((BootstrapNotifier)iBeaconManager.getMonitoringNotifier(), region);
         return region;
     }
 
@@ -1261,7 +1266,7 @@ public class LocationManager extends CordovaPlugin implements BeaconConsumer {
 
         // identifier
         if (region.getUniqueId() != null) {
-       	 dict.put("identifier", region.getUniqueId());
+         dict.put("identifier", region.getUniqueId());
        }
 
        //NOT SUPPORTING CIRCULAR REGIONS
